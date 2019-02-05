@@ -1,153 +1,163 @@
 import React, { Component } from 'react';
-import Axios from 'axios';
-let valid = false;
+import axios from 'axios';
 class Registration extends Component {
-    constructor(props){
-        super(props)
-        this.state = { 
-            funct:{
-        firstname :'',
-        lastname:'',
-        email:'',
-            },
-        password:'',
-        firstnameerror :'',
-        lastnameerror:'',
-        emailerror:'',
-        passworderror:'',
-        btn:true,
-        imageURL:"",
-        res:true,
-     }
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: "",
+      name: "",
+      password: "",
+      formErrors: { name: "", email: "", password: "" },
+      usernameValid: false,
+      emailValid: false,
+      passwordValid: false,
+      formValid: false,
+      res:false,
+    };
+  }
+
+  handleReset = () =>{
+      this.setState({
+        email: "",
+        name: "",
+        password: "",
+        formErrors: { name: "", email: "", password: "" },
+        usernameValid: false,
+        emailValid: false,
+        passwordValid: false,
+        formValid: false,
+        res:false,
+      })
+  }
+
+
+  handleUserInput = e => {
+    const name = e.target.name;
+    const value = e.target.value;
+    this.setState({ [name]: value }, () => {
+      this.validateField(name, value);
+    });
+    let res =true;
+    this.setState({res});
+  };
+  validateField(fieldName, value) {
+    let fieldValidationErrors = this.state.formErrors;
+    let usernameValid = this.state.usernameValid;
+    let emailValid = this.state.emailValid;
+    let passwordValid = this.state.passwordValid;
+    switch (fieldName) {
+      case "name":
+        usernameValid =
+          value.match(/^[a-zA-Z][a-zA-Z0-9]*$/) &&
+          (value.length >= 5 && value.length <= 11);
+        fieldValidationErrors.name = usernameValid
+          ? ""
+          : " should be 5 to 11 characters long";
+        break;
+      case "email":
+        emailValid = value.match(
+          /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
+        );
+        fieldValidationErrors.email = emailValid ? "" : " invalid email";
+        break;
+      case "password":
+          passwordValid = value.length >= 8;
+          fieldValidationErrors.password = passwordValid ? "" : " Should be atleast 8 characters long";
+          break;
+      default:
+        break;
     }
-     handleChange = (e) =>{
-        // console.log('Hello',e);
-         this.setState({[e.target.name]:e.target.value})
-         let firstnameerror ='';
-         let lastnameerror='';
-         let emailerror='';
-         let passworderror='';
-         let name=e.target.name;
-         let value=e.target.value;
-         let msg='';
-         if(name==='firstname'||name==='lastname'){
-         if (name.split("name").length > 1) {
-            let reg1 = /[^a-zA-Z0-9]/;
-            if (!reg1.test(value) === false)
-              msg = "Name cannot include special characters";
-            else if (value.length < 5 || value.length > 10)
-              msg =
-                "Name should be greater than 5 characters and less than 11 characters";
-            else if (value.length > 0 && !isNaN(value[0]))
-              msg = "Name cannot start with a Number";
-            else msg = "";
-            if(name==='firstname')firstnameerror=msg;
-            else lastnameerror=msg;
-         }
-        }
-        else if(name==='email'){
-         if (name.split("email").length > 1) {
-            let reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
-            if (reg.test(value) === false) {
-              emailerror = "Invalid Email Address";
-            } else emailerror = "";
-        }
-    }
-    else{
-
-    }
-    
-         if(firstnameerror || lastnameerror || emailerror || passworderror){
-             this.setState({firstnameerror,lastnameerror,emailerror,passworderror})
-             valid=false
-         }
-         else{
-         valid=true;
-            // console.log('entering');
-             let btn=false;
-         this.setState({btn:btn})}
-         }
-         //let msg1=this.state.firstname;
-         //let msg2=this.state.lastname;let msg3=this.state.email;
-     handleSubmit = (e) =>{
-         e.preventDefault();
-        if(valid){
-            valid=false;
-            console.log(this.state);
-            if(!this.state.firstnameerror && !this.state.lastnameerror &&!this.state.emailerror && !this.state.passworderror)
-            {
-                let btn=false;
-                this.setState({btn})
-            }
-            //const data=  this.state;
-            const body ={
-                name:this.state.firstname,
-                email:this.state.email,
-                password:this.state.password,
-            }
-            Axios.post('http://localhost:4000/submit',body)
-            .then(data=>console.log(data));
-        }
-        else
-        console.log("enter valid form");
-         }
-
-
-         handleReset = () =>{
-             this.setState({
-            firstname :'',
-            lastname:'',
-            email:'',
-            password:'',
-            firstnameerror :'',
-            lastnameerror:'',
-            emailerror:'',
-            passworderror:'',
-            btn:true,
-            res:true,
-         }
-             )}
-
-
-    render() {
-        //console.log(this.state)
-        return ( 
-            <div>
-                <h1>REGISTRATION</h1>
-                <form onSubmit={this.handleSubmit}>
-                    <div>
-                    <label>FirstName:</label>
-                    <br />
-                    <input type='text' name='firstname' onChange={this.handleChange} value={this.state.firstname} />
-                    <div style={{color:'red'}}>
-                    {this.state.firstnameerror}</div>
-                    </div>
-                    <div>
-                    <label>LastName:</label>
-                    <br />
-                    <input type='text' name='lastname' onChange={ this.handleChange} value={this.state.lastname} />
-                    <div style={{color:'red'}}>
-                    {this.state.lastnameerror}</div>
-                    </div>
-                    <div>
-                    <label>Email:</label>
-                    <br />
-                    <input type='text' name='email' onChange={this.handleChange} value={this.state.email} />
-                    <div style={{color:'red'}}>
-                    {this.state.emailerror}</div>
-                    </div>
-                    <div>
-                    <label>Password:</label>
-                    <br />
-                    <input type='password' name='password' onChange={this.handleChange} value={this.state.password} />
-                    <div style={{color:'red'}}>{this.state.passworderror}</div>
-                    </div>
-                    <button disabled={this.state.btn}>Submit</button>
-                    <button disabled={this.state.res} onClick={this.handleReset}>Reset</button>
-                </form>
-            </div>
-         );
-        }
-    }
- 
+    this.setState(
+      {
+        formErrors: fieldValidationErrors,
+        emailValid: emailValid,
+        usernameValid: usernameValid,
+        passwordValid: passwordValid
+      },
+      this.validateForm
+    );
+  }
+  validateForm() {
+    this.setState({
+      formValid:
+        this.state.emailValid &&
+        this.state.usernameValid &&
+        this.state.passwordValid
+    });
+  }
+  errorClass(error) {
+    return error.length === 0 ? "" : "has-error";
+  }
+handleSubmit = event => {
+  event.preventDefault();
+  // const user = {
+  //   name: this.state.name,
+  //   email: this.state.email,
+  //   password: this.state.password
+  // };
+  
+  axios.post('http://localhost:4000/submit/', { name: this.state.name,
+  email: this.state.email,
+  password: this.state.password })
+  .then(res => {
+    console.log(res);
+    console.log(res.data);
+  })
+}
+  render() {
+    return (
+      <form onSubmit = {this.handleSubmit} method = "POST">
+        <div
+          className={`form-group ${this.errorClass(
+            this.state.formErrors.name
+          )}`}
+        >
+        <h1>Registration Form</h1>
+        <label>Name:  </label><br />
+        <input type= "text"
+        name='name'
+        value={this.state.name}
+        onChange={this.handleUserInput}/>
+        <br/>
+        <div style={{color:'red'}}>
+          {this.state.formErrors.name}
+        </div>
+        </div>
+        <div
+          className={`form-group ${this.errorClass(
+            this.state.formErrors.email
+          )}`}
+        >
+        <label>Email:       </label><br />
+        <input type= "email"
+        name = 'email'
+        value={this.state.email}
+        onChange={this.handleUserInput}/>
+        <br/>
+        <div style={{color:'red'}}>
+          {this.state.formErrors.email}
+        </div>
+        </div>
+        <div
+          className={`form-group ${this.errorClass(
+            this.state.formErrors.password
+          )}`}
+        >
+        <label>Password:  </label><br />
+        <input type= "password"
+        name = 'password'
+        value={this.state.password}
+        onChange={this.handleUserInput}/>
+        <div style={{color:'red'}}>
+          {this.state.formErrors.password}
+        </div>
+        <br/>
+        
+        <input type = "submit" disabled={!this.state.formValid} value = "submit"/>
+        <button disabled={!this.state.res} onClick ={this.handleReset}>Reset</button>
+      </div>
+      </form>
+    );
+  }
+}
 export default Registration;
